@@ -21,22 +21,16 @@
 
 
 ### 未知函数求参
-已知函数y = f(x1, x2, x3,..., xn),其中有多个未知参数[param1, param2, param3,..., paramn]
-
-有一组初始值[x1_0, x2_0, x3_0,..., xn_0], [y1, y2, y3,..., yn]
-
-目标：求出未知参数[param1, param2, param3,..., paramn]的最优解
+已知函数y = f(x1, x2, x3,..., xn),其中有多个未知参数[param1, param2, param3,..., paramn]<br />
+有一组初始值[x1_0, x2_0, x3_0,..., xn_0], [y1, y2, y3,..., yn]<br />
+目标：求出未知参数[param1, param2, param3,..., paramn]的最优解<br />
 
 ## 使用方法
 已知:
-X = [x1, x2, x3,..., xn], y = [y1, y2, y3,..., yn]
-
-其中 x1 = [1, 2, 3, 4, 5], y1 = [10]
-
-y=function(x)的结构,如y = param[0] * Math.Sin(x[0]) + param[1] * Math.Cos(x[1]) + param[2] / x[2] + param[3]
-
+X = [x1, x2, x3,..., xn], y = [y1, y2, y3,..., yn]<br />
+其中 x1 = [1, 2, 3, 4, 5], y1 = [10]<br />
+y=function(x)的结构,如y = param[0] * Math.Sin(x[0]) + param[1] * Math.Cos(x[1]) + param[2] / x[2] + param[3]<br />
 其中param为未知参数,x为自变量,y为因变量<br />
-
 使用如下代码即可进行遗传算法的训练:<br />
 GeneticAlgorithm ga = new GeneticAlgorithm(<br />
 &nbsp;&nbsp;&nbsp;&nbsp;X: X, // 自变量<br />
@@ -51,20 +45,19 @@ GeneticAlgorithm ga = new GeneticAlgorithm(<br />
 &nbsp;&nbsp;&nbsp;&nbsp;function: function, // 目标函数<br />
 &nbsp;&nbsp;&nbsp;&nbsp;encodeType: "Double" // 编码方式 Double/Binary<br />
 );<br />
-
-double[] res = ga.Run(); // 运行遗传算法
-for (int i = 0; i < res.Length; i++) // 输出结果
-{
-    Console.WriteLine(res[i]);
-}
+double[] res = ga.Run(); // 运行遗传算法<br />
+for (int i = 0; i < res.Length; i++) // 输出结果<br />
+{<br />
+    Console.WriteLine(res[i]);<br />
+}<br />
 
 ## 注意事项
 此遗传算法的编码方式有两种，Double编码和Binary编码，Double编码是指将自变量和因变量都编码为实数
 
 ### Binary编码
-Binary编码是指将自变量和因变量都编码为0或1，适用于离散型变量。
-速度较double编码慢,但是可以使用多种交叉,变异方式
+Binary编码是指将自变量和因变量都编码为0或1，适用于离散型变量。<br />
+速度较double编码慢,但是可以使用多种交叉,变异方式<br />
 
 ### Double编码
-Double编码是指将自变量和因变量都编码为实数，适用于连续型变量。
-速度较binary编码快,不可指定交叉, 变异方式
+Double编码是指将自变量和因变量都编码为实数，适用于连续型变量。<br />
+速度较binary编码快,不可指定交叉, 变异方式<br />
