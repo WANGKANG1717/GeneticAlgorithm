@@ -1,3 +1,12 @@
+/**
+ * @date: 2024-03-04 21:11:41
+ * @author: WangKang
+ * @blog: 
+ * @filepath: GeneticAlgorithm.cs
+ * @description: 遗传算法
+ * Copyright 2024 WANGKANG, All Rights Reserved.
+ */
+
 /*
 算法目标：优化函数参数，使得输出误差与实际值差距最小
 y = f(x)
