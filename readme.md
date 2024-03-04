@@ -22,31 +22,35 @@
 
 ### 未知函数求参
 已知函数y = f(x1, x2, x3,..., xn),其中有多个未知参数[param1, param2, param3,..., paramn]
+
 有一组初始值[x1_0, x2_0, x3_0,..., xn_0], [y1, y2, y3,..., yn]
+
 目标：求出未知参数[param1, param2, param3,..., paramn]的最优解
 
 ## 使用方法
 已知:
 X = [x1, x2, x3,..., xn], y = [y1, y2, y3,..., yn]
+
 其中 x1 = [1, 2, 3, 4, 5], y1 = [10]
+
 y=function(x)的结构,如y = param[0] * Math.Sin(x[0]) + param[1] * Math.Cos(x[1]) + param[2] / x[2] + param[3]
 
-其中param为未知参数,x为自变量,y为因变量
+其中param为未知参数,x为自变量,y为因变量<br />
 
-使用如下代码即可进行遗传算法的训练:
-GeneticAlgorithm ga = new GeneticAlgorithm(
-    X: X, // 自变量
-    Y: Y, // 因变量
-    K: 4, // 未知参数数量
-    minValue: 1, // 未知参数最小值
-    maxValue: 10, // 未知参数最大值
-    iteratorNum: 100000, // 迭代次数
-    chromosomeNum: 100, // 种群数量
-    crossoverRate: 0.6, // 交叉概率
-    mutationRate: 0.01, // 变异概率
-    function: function, // 目标函数
-    encodeType: "Double" // 编码方式 Double/Binary
-    );
+使用如下代码即可进行遗传算法的训练:<br />
+GeneticAlgorithm ga = new GeneticAlgorithm(<br />
+    X: X, // 自变量<br />
+    Y: Y, // 因变量<br />
+    K: 4, // 未知参数数量<br />
+    minValue: 1, // 未知参数最小值<br />
+    maxValue: 10, // 未知参数最大值<br />
+    iteratorNum: 100000, // 迭代次数<br />
+    chromosomeNum: 100, // 种群数量<br />
+    crossoverRate: 0.6, // 交叉概率<br />
+    mutationRate: 0.01, // 变异概率<br />
+    function: function, // 目标函数<br />
+    encodeType: "Double" // 编码方式 Double/Binary<br />
+    );<br />
 
 double[] res = ga.Run(); // 运行遗传算法
 for (int i = 0; i < res.Length; i++) // 输出结果
