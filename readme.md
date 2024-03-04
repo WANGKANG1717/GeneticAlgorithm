@@ -39,18 +39,18 @@ y=function(x)的结构,如y = param[0] * Math.Sin(x[0]) + param[1] * Math.Cos(x[
 
 使用如下代码即可进行遗传算法的训练:<br />
 GeneticAlgorithm ga = new GeneticAlgorithm(<br />
-    X: X, // 自变量<br />
-    Y: Y, // 因变量<br />
-    K: 4, // 未知参数数量<br />
-    minValue: 1, // 未知参数最小值<br />
-    maxValue: 10, // 未知参数最大值<br />
-    iteratorNum: 100000, // 迭代次数<br />
-    chromosomeNum: 100, // 种群数量<br />
-    crossoverRate: 0.6, // 交叉概率<br />
-    mutationRate: 0.01, // 变异概率<br />
-    function: function, // 目标函数<br />
-    encodeType: "Double" // 编码方式 Double/Binary<br />
-    );<br />
+&nbsp;&nbsp;&nbsp;&nbsp;X: X, // 自变量<br />
+&nbsp;&nbsp;&nbsp;&nbsp;Y: Y, // 因变量<br />
+&nbsp;&nbsp;&nbsp;&nbsp;K: 4, // 未知参数数量<br />
+&nbsp;&nbsp;&nbsp;&nbsp;minValue: 1, // 未知参数最小值<br />
+&nbsp;&nbsp;&nbsp;&nbsp;maxValue: 10, // 未知参数最大值<br />
+&nbsp;&nbsp;&nbsp;&nbsp;iteratorNum: 100000, // 迭代次数<br />
+&nbsp;&nbsp;&nbsp;&nbsp;chromosomeNum: 100, // 种群数量<br />
+&nbsp;&nbsp;&nbsp;&nbsp;crossoverRate: 0.6, // 交叉概率<br />
+&nbsp;&nbsp;&nbsp;&nbsp;mutationRate: 0.01, // 变异概率<br />
+&nbsp;&nbsp;&nbsp;&nbsp;function: function, // 目标函数<br />
+&nbsp;&nbsp;&nbsp;&nbsp;encodeType: "Double" // 编码方式 Double/Binary<br />
+);<br />
 
 double[] res = ga.Run(); // 运行遗传算法
 for (int i = 0; i < res.Length; i++) // 输出结果
