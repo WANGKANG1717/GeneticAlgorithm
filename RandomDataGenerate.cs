@@ -12,6 +12,11 @@ namespace RandomDataGenerate
             return a * Math.Sin(x) + b * Math.Cos(y) + c / z + d;
         }
 
+        public double f2(int x, int a)
+        {
+            return x * Math.Sin(a * Math.PI * x) + 2;
+        }
+
         public void randomData(int N)
         {
             int a = 1;
@@ -29,6 +34,22 @@ namespace RandomDataGenerate
 
                 resX += "[" + x + "," + y + "," + z + "],";
                 resY += f(a, b, c, d, x, y, z).ToString("0.00") + ",";
+            }
+            resX += "]";
+            resY += "]";
+            Console.WriteLine(resX);
+            Console.WriteLine(resY);
+        }
+
+        public void randomData2(int N)
+        {
+            int a = 10;
+            string resX = "[";
+            string resY = "[";
+            for (int x = 1; x <= N; x++)
+            {
+                resX += "[" + x + "],";
+                resY += f2(x, a) + ",";
             }
             resX += "]";
             resY += "]";
