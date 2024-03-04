@@ -24,7 +24,7 @@ GeneticAlgorithm ga = new GeneticAlgorithm(
     K: 4,
     minValue: 1,
     maxValue: 10,
-    iteratorNum: 10000,
+    iteratorNum: 100000,
     chromosomeNum: 100,
     crossoverRate: 0.6,
     mutationRate: 0.01,
