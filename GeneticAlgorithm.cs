@@ -51,8 +51,8 @@ namespace GA_Template
         // 最优保留策略相关参数
         private double reserveRate; // 保留概率
         private int reserveNum; // 保留数量 根据reserveRate计算得到
-        private string[][]? bestReserveChromosomeMatrix; // 保留染色体矩阵 二进制编码
-        private double[][]? bestReserveChromosomeMatrixDouble; // 保留染色体矩阵 浮点数编码
+        // private string[][]? bestReserveChromosomeMatrix; // 保留染色体矩阵 二进制编码
+        // private double[][]? bestReserveChromosomeMatrixDouble; // 保留染色体矩阵 浮点数编码
 
         private string[][]? chromosomeMatrix; // 染色体矩阵 二进制编码
 
@@ -68,6 +68,7 @@ namespace GA_Template
         private List<double[]> resultAdaptability = []; // 适应度结果集
         private List<int[][]> resultChromosomeMatrix = []; // 染色体矩阵结果集
 
+        double maxAdaptability = double.MinValue;
         string[] bestChromosome; // 最大适应度 二进制编码
         double[] bestChromosomeDouble; // 最大适应度 浮点数编码
 
@@ -129,7 +130,7 @@ namespace GA_Template
             this.mutationType = mutationType;
             this.geneticStrategy = geneticStrategy;
             this.reserveRate = reserveRate;
-            this.reserveNum = (int)(chromosomeNum * reserveRate);
+            this.reserveNum = (int)(chromosomeNum * this.reserveRate);
 
             InitY_hat();
             this.numberOfBits = calculateNumberOfBits();
@@ -146,89 +147,6 @@ namespace GA_Template
                 throw new Exception("不支持的类型(仅支持Binary和Double类型)");
             }
         }
-
-        public void Test()
-        {
-            // Console.WriteLine("numberOfBits:" + this.numberOfBits);
-            // Console.WriteLine(Decode("11111111111"));
-            // Console.WriteLine(Decode("00000000000"));
-
-            // Console.WriteLine(StringToNumber("111"));
-            // Console.WriteLine(ReverseString("1,2,3,34,4,5,6,7,8,9"));
-
-            // for (int i = 0; i < 10; i++)
-            // {
-            // 	 int number = RandomNumber(4);
-            // 	string bianryString = RandomBinaryString(4);
-            // 	 Console.WriteLine(number + "," + bianryString);
-            // }
-
-            Run();
-            // for (int i = 0; i < chromosomeNum; i++)
-            // {
-            // 	for (int j = 0; j < K; j++)
-            // 	{
-            // 		Console.Write(chromosomeMatrix[i][j] + ", ");
-            // 	}
-            // 	Console.WriteLine();
-            // }
-            // Console.WriteLine("============================");
-            // for (int i = 0; i < chromosomeNum; i++)
-            // {
-            //     for (int j = 0; j < K; j++)
-            //     {
-            //         Console.Write(Decode(chromosomeMatrix[i][j]) + ", ");
-            //     }
-            //     Console.WriteLine();
-            // }
-            double[] adaptability = CalculateAdaptability();
-            double[] naturalSelectionRate = CalculateNaturalSelectionRate(adaptability);
-            int index = -1;
-            double maxAdaptability = double.MinValue;
-
-            for (int i = 0; i < chromosomeNum; i++)
-            {
-                if (adaptability[i] > maxAdaptability)
-                {
-                    maxAdaptability = adaptability[i];
-                    index = i;
-                }
-            }
-            Console.WriteLine("============================");
-            for (int i = 0; i < K; i++)
-            {
-                if (encodeType == "Binary")
-                {
-                    if (chromosomeMatrix == null)
-                    {
-                        throw new Exception("染色体矩阵为空");
-                    }
-                    Console.Write(Decode(chromosomeMatrix[index][i]) + ", ");
-                }
-                else if (encodeType == "Double")
-                {
-                    if (chromosomeMatrixDouble == null)
-                    {
-                        throw new Exception("染色体矩阵为空");
-                    }
-                    Console.Write(chromosomeMatrixDouble[index][i] + ", ");
-                }
-            }
-            Console.WriteLine();
-            Console.WriteLine("=====================");
-            for (int i = 0; i < K; i++)
-            {
-                if (encodeType == "Binary")
-                {
-                    Console.Write(bestChromosome[i] + ", ");
-                }
-                else if (encodeType == "Double")
-                {
-                    Console.Write(bestChromosomeDouble[i] + ", ");
-                }
-            }
-        }
-
 
         /// <summary>
         /// 计算符合精度的二进制编码的长度
@@ -324,6 +242,10 @@ namespace GA_Template
             {
                 throw new Exception("chromosomeMatrix is null");
             }
+            if (chromosomeMatrix.Length != chromosomeNum)
+            {
+                throw new Exception("染色体数量不正确");
+            }
             // 使用键值对，将染色体适应度与染色体索引进行关联
             // 按照适应度从大到小排序
             KeyValuePair<int, double>[] index_selectRate = new KeyValuePair<int, double>[chromosomeNum];
@@ -335,10 +257,7 @@ namespace GA_Template
 
             List<string[]> bestReserveChromosomeMatrix = new List<string[]>(); // 最优保留染色体矩阵
             List<string[]> chromosomeMatrixTmp = new List<string[]>(); // 剩下的染色体矩阵
-            if (chromosomeMatrix.Length != chromosomeNum)
-            {
-                throw new Exception("染色体数量不正确");
-            }
+
             // 选择适应度最高的reserveNum条染色体保留下来
             double[] newNaturalSelectionRate = new double[chromosomeNum - reserveNum];
             for (int i = 0; i < chromosomeNum; i++)
@@ -383,7 +302,7 @@ namespace GA_Template
                         // 对剩下的染色体进行遗传交叉变异
                         // 将最优染色体与上一步骤的到的染色体合并
                         object[] result = reserveBestChromosome(chromosomeMatrix, naturalSelectionRate);
-                        bestReserveChromosomeMatrix = (string[][])result[0];
+                        string[][] bestReserveChromosomeMatrix = (string[][])result[0];
                         chromosomeMatrix = (string[][])result[1];
                         naturalSelectionRate = (double[])result[2];
 
@@ -405,17 +324,10 @@ namespace GA_Template
                 {
                     if (geneticStrategy == "random")
                     {
-                        // 按照自然选择率大小先选择{chromosomeNum}条染色体
-                        // 相当于np.random.choice
-                        double[][] newChromosomeMatrix;
-                        // 选择{crossoverNum}条染色体参与交叉
-                        newChromosomeMatrix = SelectDouble(chromosomeMatrix, naturalSelectionRate);
-                        newChromosomeMatrix = CrossDouble(newChromosomeMatrix);
-                        // 选择{mutationNum}条染色体参与变异
-                        newChromosomeMatrix = MutationDouble(newChromosomeMatrix, itIndex);
+                        double[][] newChromosomeMatrixDouble = SelectCrossMutationDouble(chromosomeMatrixDouble, naturalSelectionRate, itIndex);
 
                         // 更新chromosomeMatrix
-                        chromosomeMatrixDouble = newChromosomeMatrix;
+                        chromosomeMatrixDouble = newChromosomeMatrixDouble;
                         if (chromosomeMatrixDouble.Length != chromosomeNum)
                         {
                             throw new Exception("染色体数量不正确");
@@ -423,7 +335,22 @@ namespace GA_Template
                     }
                     else if (geneticStrategy == "best")
                     {
+                        // 按照自然选择率大小先选择最好的{bestChromosomeNum}条染色体
+                        // 对剩下的染色体进行遗传交叉变异
+                        // 将最优染色体与上一步骤的到的染色体合并
+                        object[] result = reserveBestChromosomeDouble(chromosomeMatrixDouble, naturalSelectionRate);
+                        double[][] bestReserveChromosomeMatrixDouble = (double[][])result[0];
+                        chromosomeMatrixDouble = (double[][])result[1];
+                        naturalSelectionRate = (double[])result[2];
 
+                        double[][] newChromosomeMatrixDouble = SelectCrossMutationDouble(chromosomeMatrixDouble, naturalSelectionRate, itIndex);
+
+                        // 更新chromosomeMatrix
+                        chromosomeMatrixDouble = mergeChromosomeMatrixDouble(bestReserveChromosomeMatrixDouble, newChromosomeMatrixDouble);
+                        if (chromosomeMatrixDouble.Length != chromosomeNum)
+                        {
+                            throw new Exception("染色体数量不正确");
+                        }
                     }
                     else
                     {
@@ -436,6 +363,7 @@ namespace GA_Template
                 }
             }
 
+            CalculateAdaptability(); // 最后再计算一次适应度
             // 返回值
             if (encodeType == "Binary")
             {
@@ -449,6 +377,79 @@ namespace GA_Template
             {
                 throw new Exception("不支持的类型(仅支持Binary和Double类型)");
             }
+        }
+
+        private object[] reserveBestChromosomeDouble(double[][]? chromosomeMatrixDouble, double[] naturalSelectionRate)
+        {
+            if (chromosomeMatrixDouble == null)
+            {
+                throw new Exception("chromosomeMatrixDouble is null");
+            }
+            if (chromosomeMatrixDouble.Length != chromosomeNum)
+            {
+                throw new Exception("染色体数量不正确");
+            }
+            // 使用键值对，将染色体适应度与染色体索引进行关联
+            // 按照适应度从大到小排序
+            KeyValuePair<int, double>[] index_selectRate = new KeyValuePair<int, double>[chromosomeNum];
+            for (int i = 0; i < chromosomeNum; i++)
+            {
+                index_selectRate[i] = new KeyValuePair<int, double>(i, naturalSelectionRate[i]);
+            }
+            Array.Sort(index_selectRate, (x, y) => y.Value.CompareTo(x.Value));
+
+            List<double[]> bestReserveChromosomeMatrixDouble = new List<double[]>(); // 最优保留染色体矩阵
+            List<double[]> chromosomeMatrixDoubleTmp = new List<double[]>(); // 剩下的染色体矩阵
+
+            // 选择适应度最高的reserveNum条染色体保留下来
+            double[] newNaturalSelectionRate = new double[chromosomeNum - reserveNum];
+            for (int i = 0; i < chromosomeNum; i++)
+            {
+                if (i < reserveNum)
+                    bestReserveChromosomeMatrixDouble.Add(chromosomeMatrixDouble[index_selectRate[i].Key]);
+                else
+                {
+                    chromosomeMatrixDoubleTmp.Add(chromosomeMatrixDouble[index_selectRate[i].Key]);
+                    newNaturalSelectionRate[i - reserveNum] = index_selectRate[i].Value;
+                }
+            }
+            object[] result = [bestReserveChromosomeMatrixDouble.ToArray(), chromosomeMatrixDoubleTmp.ToArray(), newNaturalSelectionRate];
+            return result;
+        }
+
+        private double[][] mergeChromosomeMatrixDouble(double[][] bestReserveChromosomeMatrixDouble, double[][] newChromosomeMatrixDouble)
+        {
+            if (bestReserveChromosomeMatrixDouble == null)
+            {
+                throw new Exception("bestReserveChromosomeMatrixDouble is null");
+            }
+            List<double[]> chromosomeMatrixDoubleTmp = new List<double[]>();
+            for (int i = 0; i < bestReserveChromosomeMatrixDouble.Length; i++)
+            {
+                chromosomeMatrixDoubleTmp.Add(bestReserveChromosomeMatrixDouble[i]);
+            }
+            for (int i = 0; i < newChromosomeMatrixDouble.Length; i++)
+            {
+                chromosomeMatrixDoubleTmp.Add(newChromosomeMatrixDouble[i]);
+            }
+            return chromosomeMatrixDoubleTmp.ToArray();
+        }
+
+        private double[][] SelectCrossMutationDouble(double[][]? chromosomeMatrixDouble, double[] naturalSelectionRate, int itIndex)
+        {
+            if (chromosomeMatrixDouble == null)
+            {
+                throw new Exception("染色体矩阵为空！");
+            }
+            // 按照自然选择率大小先选择{chromosomeNum}条染色体
+            // 相当于np.random.choice
+            double[][] newChromosomeMatrixDouble;
+            // 选择{crossoverNum}条染色体参与交叉
+            newChromosomeMatrixDouble = SelectDouble(chromosomeMatrixDouble, naturalSelectionRate);
+            newChromosomeMatrixDouble = CrossDouble(newChromosomeMatrixDouble);
+            // 选择{mutationNum}条染色体参与变异
+            newChromosomeMatrixDouble = MutationDouble(newChromosomeMatrixDouble, itIndex);
+            return newChromosomeMatrixDouble;
         }
 
         private string[][] SelectCrossMutation(string[][]? chromosomeMatrix, double[] naturalSelectionRate, int itIndex)
@@ -482,21 +483,21 @@ namespace GA_Template
             return chromosomeMatrixTmp.ToArray();
         }
 
-        private double[][] MutationDouble(double[][] newChromosomeMatrix, int iterations)
+        private double[][] MutationDouble(double[][] newChromosomeMatrixDouble, int iterations)
         {
             Random random = new Random();
-            for (int i = 0; i < chromosomeNum; i++)
+            for (int i = 0; i < newChromosomeMatrixDouble.Length; i++)
             {
                 for (int j = 0; j < K; j++)
                 {
                     double rate = random.NextDouble();
                     if (rate <= mutationRate * Math.Pow(1 - iterations / (iteratorNum - 1), 2)) // 变异率应该逐步减少，，以达到稳定状态
                     {
-                        newChromosomeMatrix[i][j] = RandomMutationDouble(newChromosomeMatrix[i][j]); // 单点变异
+                        newChromosomeMatrixDouble[i][j] = RandomMutationDouble(newChromosomeMatrixDouble[i][j]); // 单点变异
                     }
                 }
             }
-            return newChromosomeMatrix;
+            return newChromosomeMatrixDouble;
         }
 
         private double RandomMutationDouble(double val)
@@ -505,31 +506,27 @@ namespace GA_Template
             return random.NextDouble() * (maxValue - minValue) + minValue;
         }
 
-        private double[][] CrossDouble(double[][] newChromosomeMatrix)
+        private double[][] CrossDouble(double[][] newChromosomeMatrixDouble)
         {
-            if (newChromosomeMatrix == null)
+            if (newChromosomeMatrixDouble == null)
             {
                 throw new Exception("染色体矩阵为空！");
             }
-            if (newChromosomeMatrix.Length != chromosomeNum)
-            {
-                throw new Exception("染色体数量不正确！");
-            }
             Random random = new Random();
-            double[][] tmpChromosomeMatrix = new double[chromosomeNum][];
-            for (int i = 0; i < newChromosomeMatrix.Length; i++)
+            double[][] tmpChromosomeMatrix = new double[newChromosomeMatrixDouble.Length][];
+            for (int i = 0; i < newChromosomeMatrixDouble.Length; i++)
             {
                 double rate = random.NextDouble();
                 // 判断该染色体是否需要交叉
                 if (rate <= crossoverRate)
                 {
                     // 当前染色体作为父本
-                    int j = random.Next(0, chromosomeNum); // 选择需要交叉的母本
-                    tmpChromosomeMatrix[i] = RandomCrossDouble(newChromosomeMatrix[i], newChromosomeMatrix[j]);// 随机浮点数交叉
+                    int j = random.Next(0, newChromosomeMatrixDouble.Length); // 选择需要交叉的母本
+                    tmpChromosomeMatrix[i] = RandomCrossDouble(newChromosomeMatrixDouble[i], newChromosomeMatrixDouble[j]);// 随机浮点数交叉
                 }
                 else // 不交叉，直接保留
                 {
-                    tmpChromosomeMatrix[i] = newChromosomeMatrix[i];
+                    tmpChromosomeMatrix[i] = newChromosomeMatrixDouble[i];
                 }
             }
             return tmpChromosomeMatrix;
@@ -547,7 +544,7 @@ namespace GA_Template
             return chromosome;
         }
 
-        private double[][] SelectDouble(string[][]? chromosomeMatrix, double[] naturalSelectionRate)
+        private double[][] SelectDouble(double[][]? chromosomeMatrixDouble, double[] naturalSelectionRate)
         {
             if (chromosomeMatrixDouble == null)
             {
@@ -557,9 +554,9 @@ namespace GA_Template
             {
                 throw new Exception("自然选择率未计算！");
             }
-            double[][] newChromosomeMatrix = new double[chromosomeNum][];
-            int[] selectedIndex = SelectChromosomeIndex(naturalSelectionRate, chromosomeNum);
-            for (int i = 0; i < chromosomeNum; i++)
+            double[][] newChromosomeMatrix = new double[chromosomeMatrixDouble.Length][];
+            int[] selectedIndex = SelectChromosomeIndex(naturalSelectionRate, chromosomeMatrixDouble.Length);
+            for (int i = 0; i < chromosomeMatrixDouble.Length; i++)
             {
                 newChromosomeMatrix[i] = chromosomeMatrixDouble[selectedIndex[i]];
             }
@@ -883,8 +880,6 @@ namespace GA_Template
 
             // 用来求解计算过程中最佳的染色体
             int index = -1;
-            double maxAdaptability = double.MinValue;
-
             for (int i = 0; i < chromosomeNum; i++)
             {
                 if (adaptability[i] > maxAdaptability)
@@ -894,21 +889,24 @@ namespace GA_Template
                 }
             }
 
-            if (encodeType == "Binary")
+            if (index != -1)
             {
-                if (chromosomeMatrix == null)
+                if (encodeType == "Binary")
                 {
-                    throw new Exception("染色体矩阵为空！");
+                    if (chromosomeMatrix == null)
+                    {
+                        throw new Exception("染色体矩阵为空！");
+                    }
+                    bestChromosome = chromosomeMatrix[index];
                 }
-                bestChromosome = chromosomeMatrix[index];
-            }
-            else
-            {
-                if (chromosomeMatrixDouble == null)
+                else
                 {
-                    throw new Exception("染色体矩阵为空！");
+                    if (chromosomeMatrixDouble == null)
+                    {
+                        throw new Exception("染色体矩阵为空！");
+                    }
+                    bestChromosomeDouble = chromosomeMatrixDouble[index];
                 }
-                bestChromosomeDouble = chromosomeMatrixDouble[index];
             }
 
             return adaptability;
