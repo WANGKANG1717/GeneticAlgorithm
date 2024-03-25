@@ -38,7 +38,7 @@ namespace GA_Template
 
         private double[][] X;
         private double[] Y;
-        private double[][] Y_hat; // 行为chromosomeNum，列为N
+        private double[][]? Y_hat; // 行为chromosomeNum，列为N
         private int N; // =X的行数 / =Y的行数
         private int M; // =X的列数
         private int K; // 需要优化的参数个数
@@ -66,11 +66,13 @@ namespace GA_Template
         private Func<double[], double[], double> function; // 计算函数 使用Lambda表达式
 
         private double maxAdaptability = double.MinValue;
-        private string[] bestChromosome; // 最大适应度 二进制编码 // 全局最优
-        private double[] bestChromosomeDouble; // 最大适应度 浮点数编码 // 全局最优
+        public string[]? bestChromosome; // 最大适应度 二进制编码 // 全局最优
+        public double[]? bestChromosomeDouble; // 最大适应度 浮点数编码 // 全局最优
 
-        public string[] bestChromosomeLocal; // 最大适应度 二进制编码 // 最后最优
-        public double[] bestChromosomeDoubleLocal; // 最大适应度 浮点数编码 // 最后最优
+        public string[]? bestChromosomeLocal; // 最大适应度 二进制编码 // 局部最优
+        public double[]? bestChromosomeDoubleLocal; // 最大适应度 浮点数编码 // 局部最优
+
+        string returnType = "Local"; // 返回值类型 Local/Global
 
         /// <summary>
         /// 构造函数
@@ -90,6 +92,7 @@ namespace GA_Template
         /// <param name="mutationType">变异方式 single/uniform</param>
         /// <param name="geneticStrategy">遗传策略 random/best</param>
         /// <param name="reserveRate">最佳保留率 只有在geneticStrategy为best时才有效</param>
+        /// <param name="returnType">返回值类型 分为全局最优和局部最优 Local/Global 经过测试，局部最优效果更好</param>
         public GeneticAlgorithm(
             double[][] X,
             double[] Y,
@@ -106,7 +109,8 @@ namespace GA_Template
             string mutationType = "single",
             string encodeType = "Binary",
             string geneticStrategy = "random",
-            double reserveRate = 0.1)
+            double reserveRate = 0.1,
+            string returnType = "Local")
         {
             Verify(X, Y);
             if (chromosomeNum % 2 != 0)
@@ -127,9 +131,9 @@ namespace GA_Template
             this.accuracy = accuracy;
             this.crossType = crossType;
             this.mutationType = mutationType;
-            this.geneticStrategy = geneticStrategy;
             this.reserveRate = reserveRate;
             this.reserveNum = (int)(chromosomeNum * this.reserveRate);
+
 
             InitY_hat();
             this.numberOfBits = calculateNumberOfBits();
@@ -144,6 +148,24 @@ namespace GA_Template
             else
             {
                 throw new Exception("不支持的类型(仅支持Binary和Double类型)");
+            }
+
+            if (geneticStrategy == "random" || geneticStrategy == "best")
+            {
+                this.geneticStrategy = geneticStrategy;
+            }
+            else
+            {
+                throw new Exception("不支持的遗传策略(仅支持random和best)");
+            }
+
+            if (returnType == "Local" || returnType == "Global")
+            {
+                this.returnType = returnType;
+            }
+            else
+            {
+                throw new Exception("不支持的返回值类型(仅支持Local和Global类型)");
             }
         }
 
@@ -182,8 +204,12 @@ namespace GA_Template
         /// </summary>
         /// <param name="binaryString">染色体</param>
         /// <returns>解码后的实际值</returns>
-        public double[] Decode(string[] chromosome)
+        public double[] Decode(string[]? chromosome)
         {
+            if (chromosome == null)
+            {
+                throw new Exception("chromosome is null");
+            }
             double[] res = new double[K];
             for (int i = 0; i < K; i++)
             {
@@ -376,11 +402,49 @@ namespace GA_Template
             // 返回值
             if (encodeType == "Binary")
             {
-                return Decode(bestChromosome);
+                if (returnType == "Local")
+                {
+                    if (bestChromosomeLocal == null)
+                    {
+                        throw new Exception("bestChromosomeLocal is null");
+                    }
+                    return Decode(bestChromosomeLocal);
+                }
+                else if (returnType == "Global")
+                {
+                    if (bestChromosome == null)
+                    {
+                        throw new Exception("bestChromosome is null");
+                    }
+                    return Decode(bestChromosome);
+                }
+                else
+                {
+                    throw new Exception("不支持的返回值类型");
+                }
             }
             else if (encodeType == "Double")
             {
-                return bestChromosomeDouble;
+                if (returnType == "Local")
+                {
+                    if (bestChromosomeDoubleLocal == null)
+                    {
+                        throw new Exception("bestChromosomeDoubleLocal is null");
+                    }
+                    return bestChromosomeDoubleLocal;
+                }
+                else if (returnType == "Global")
+                {
+                    if (bestChromosomeDouble == null)
+                    {
+                        throw new Exception("bestChromosomeDouble is null");
+                    }
+                    return bestChromosomeDouble;
+                }
+                else
+                {
+                    throw new Exception("不支持的返回值类型");
+                }
             }
             else
             {
@@ -881,6 +945,10 @@ namespace GA_Template
             }
             double[] sumDeviation = new double[chromosomeNum];
             double[] adaptability = new double[chromosomeNum];
+            if (Y_hat == null)
+            {
+                throw new Exception("Y_hat未计算！");
+            }
             for (int i = 0; i < chromosomeNum; i++)
             {
                 sumDeviation[i] = CalculateSumDeviation(Y, Y_hat[i]);
@@ -950,6 +1018,10 @@ namespace GA_Template
         /// <returns>Y_hat</returns>
         private void CalculateY_hat(string[][] chromosomeMatrix, Func<double[], double[], double> function)
         {
+            if (Y_hat == null)
+            {
+                throw new Exception("Y_hat未计算！");
+            }
             for (int i = 0; i < chromosomeNum; i++)
             {
                 for (int j = 0; j < N; j++)
@@ -961,6 +1033,10 @@ namespace GA_Template
 
         private void CalculateY_hat(double[][] chromosomeMatrix, Func<double[], double[], double> function)
         {
+            if (Y_hat == null)
+            {
+                throw new Exception("Y_hat未计算！");
+            }
             for (int i = 0; i < chromosomeNum; i++)
             {
                 for (int j = 0; j < N; j++)
