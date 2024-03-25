@@ -34,6 +34,8 @@ namespace GA_Template
     public class GeneticAlgorithm
     {
         private string encodeType = "Binary"; // 编码方式 Binary / Double
+        private string geneticStrategy = "random"; // 遗传策略 random: 随机策略 best：最优保留
+
         private double[][] X;
         private double[] Y;
         private double[][] Y_hat; // 行为chromosomeNum，列为N
@@ -81,6 +83,7 @@ namespace GA_Template
         /// <param name="accuracy">精度</param>
         /// <param name="crossType">交叉方式 single/twoPoint/uniform</param>
         /// <param name="mutationType">变异方式 single/uniform</param>
+        /// <param name="geneticStrategy">遗传策略 random/best</param>
         public GeneticAlgorithm(
             double[][] X,
             double[] Y,
@@ -95,7 +98,8 @@ namespace GA_Template
             double accuracy = 0.001, // 二进制编码有用
             string crossType = "single",
             string mutationType = "single",
-            string encodeType = "Binary")
+            string encodeType = "Binary",
+            string geneticStrategy = "random")
         {
             Verify(X, Y);
             if (chromosomeNum % 2 != 0)
@@ -116,6 +120,7 @@ namespace GA_Template
             this.accuracy = accuracy;
             this.crossType = crossType;
             this.mutationType = mutationType;
+            this.geneticStrategy = geneticStrategy;
 
             InitY_hat();
             this.numberOfBits = calculateNumberOfBits();
@@ -315,39 +320,64 @@ namespace GA_Template
                 double[] naturalSelectionRate = CalculateNaturalSelectionRate(adaptability);
                 if (encodeType == "Binary")
                 {
-                    // 按照自然选择率大小先选择{chromosomeNum}条染色体
-                    // 相当于np.random.choice
-                    string[][] newChromosomeMatrix;
-                    newChromosomeMatrix = Select(chromosomeMatrix, naturalSelectionRate);
-                    // 选择{crossoverNum}条染色体参与交叉
-                    newChromosomeMatrix = Cross(newChromosomeMatrix);
-                    // 选择{mutationNum}条染色体参与变异
-                    newChromosomeMatrix = Mutation(newChromosomeMatrix, itIndex);
-
-                    // 更新chromosomeMatrix
-                    chromosomeMatrix = newChromosomeMatrix;
-                    if (chromosomeMatrix.Length != chromosomeNum)
+                    if (geneticStrategy == "random")
                     {
-                        throw new Exception("染色体数量不正确");
+                        // 按照自然选择率大小先选择{chromosomeNum}条染色体
+                        // 相当于np.random.choice
+                        string[][] newChromosomeMatrix;
+                        newChromosomeMatrix = Select(chromosomeMatrix, naturalSelectionRate);
+                        // 选择{crossoverNum}条染色体参与交叉
+                        newChromosomeMatrix = Cross(newChromosomeMatrix);
+                        // 选择{mutationNum}条染色体参与变异
+                        newChromosomeMatrix = Mutation(newChromosomeMatrix, itIndex);
+                        // 更新chromosomeMatrix
+                        chromosomeMatrix = newChromosomeMatrix;
+                        if (chromosomeMatrix.Length != chromosomeNum)
+                        {
+                            throw new Exception("染色体数量不正确");
+                        }
+                    }
+                    else if (geneticStrategy == "best")
+                    {
+
+                    }
+                    else
+                    {
+                        throw new Exception("不支持的遗传策略");
                     }
                 }
                 else if (encodeType == "Double")
                 {
-                    // 按照自然选择率大小先选择{chromosomeNum}条染色体
-                    // 相当于np.random.choice
-                    double[][] newChromosomeMatrix;
-                    // 选择{crossoverNum}条染色体参与交叉
-                    newChromosomeMatrix = SelectDouble(chromosomeMatrix, naturalSelectionRate);
-                    newChromosomeMatrix = CrossDouble(newChromosomeMatrix);
-                    // 选择{mutationNum}条染色体参与变异
-                    newChromosomeMatrix = MutationDouble(newChromosomeMatrix, itIndex);
-
-                    // 更新chromosomeMatrix
-                    chromosomeMatrixDouble = newChromosomeMatrix;
-                    if (chromosomeMatrixDouble.Length != chromosomeNum)
+                    if (geneticStrategy == "random")
                     {
-                        throw new Exception("染色体数量不正确");
+                        // 按照自然选择率大小先选择{chromosomeNum}条染色体
+                        // 相当于np.random.choice
+                        double[][] newChromosomeMatrix;
+                        // 选择{crossoverNum}条染色体参与交叉
+                        newChromosomeMatrix = SelectDouble(chromosomeMatrix, naturalSelectionRate);
+                        newChromosomeMatrix = CrossDouble(newChromosomeMatrix);
+                        // 选择{mutationNum}条染色体参与变异
+                        newChromosomeMatrix = MutationDouble(newChromosomeMatrix, itIndex);
+
+                        // 更新chromosomeMatrix
+                        chromosomeMatrixDouble = newChromosomeMatrix;
+                        if (chromosomeMatrixDouble.Length != chromosomeNum)
+                        {
+                            throw new Exception("染色体数量不正确");
+                        }
                     }
+                    else if (geneticStrategy == "best")
+                    {
+
+                    }
+                    else
+                    {
+                        throw new Exception("不支持的遗传策略");
+                    }
+                }
+                else
+                {
+                    throw new Exception("不支持的类型(仅支持Binary和Double类型)");
                 }
             }
 
@@ -356,9 +386,13 @@ namespace GA_Template
             {
                 return Decode(bestChromosome);
             }
-            else
+            else if (encodeType == "Double")
             {
                 return bestChromosomeDouble;
+            }
+            else
+            {
+                throw new Exception("不支持的类型(仅支持Binary和Double类型)");
             }
         }
 
