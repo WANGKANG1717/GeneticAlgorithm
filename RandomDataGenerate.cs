@@ -17,6 +17,11 @@ namespace RandomDataGenerate
             return x * Math.Sin(a * Math.PI * x) + 2;
         }
 
+        public double f3(int x, int a, int b)
+        {
+            return b * x * x + 2 * a * x + 1;
+        }
+
         public void randomData(int N)
         {
             int a = 1;
@@ -50,6 +55,23 @@ namespace RandomDataGenerate
             {
                 resX += "[" + x + "],";
                 resY += f2(x, a) + ",";
+            }
+            resX += "]";
+            resY += "]";
+            Console.WriteLine(resX);
+            Console.WriteLine(resY);
+        }
+
+        public void randomData3(int N)
+        {
+            int a = 10;
+            int b = 100;
+            string resX = "[";
+            string resY = "[";
+            for (int x = 1; x <= N; x++)
+            {
+                resX += "[" + x + "],";
+                resY += f3(x, a, b) + ",";
             }
             resX += "]";
             resY += "]";
