@@ -610,10 +610,18 @@ namespace GA
 
             if (encodeType == "Binary")
             {
+                if (chromosomeMatrix == null)
+                {
+                    throw new Exception("染色体矩阵为空！");
+                }
                 bestChromosome = chromosomeMatrix[index];
             }
             else
             {
+                if (chromosomeMatrixDouble == null)
+                {
+                    throw new Exception("染色体矩阵为空！");
+                }
                 bestChromosomeDouble = chromosomeMatrixDouble[index];
             }
 
