@@ -69,8 +69,11 @@ namespace GA_Template
         private List<int[][]> resultChromosomeMatrix = []; // 染色体矩阵结果集
 
         double maxAdaptability = double.MinValue;
-        string[] bestChromosome; // 最大适应度 二进制编码
-        double[] bestChromosomeDouble; // 最大适应度 浮点数编码
+        string[] bestChromosome; // 最大适应度 二进制编码 // 全局最优
+        double[] bestChromosomeDouble; // 最大适应度 浮点数编码 // 全局最优
+
+        string[] bestChromosomeLocal; // 最大适应度 二进制编码 // 最后最优
+        double[] bestChromosomeDoubleLocal; // 最大适应度 浮点数编码 // 最后最优
 
 
         /// <summary>
@@ -880,32 +883,53 @@ namespace GA_Template
 
             // 用来求解计算过程中最佳的染色体
             int index = -1;
+
+            double maxAdaptabilityLocal = double.MinValue;
+            int index_local = -1;
             for (int i = 0; i < chromosomeNum; i++)
             {
+                // 计算全局最优解
                 if (adaptability[i] > maxAdaptability)
                 {
                     maxAdaptability = adaptability[i];
                     index = i;
                 }
+                // 计算局部最优解
+                if (adaptability[i] > maxAdaptabilityLocal)
+                {
+                    maxAdaptabilityLocal = adaptability[i];
+                    index_local = i;
+                }
             }
 
-            if (index != -1)
+            if (encodeType == "Binary")
             {
-                if (encodeType == "Binary")
+                if (chromosomeMatrix == null)
                 {
-                    if (chromosomeMatrix == null)
-                    {
-                        throw new Exception("染色体矩阵为空！");
-                    }
+                    throw new Exception("染色体矩阵为空！");
+                }
+                if (index != -1)
+                {
                     bestChromosome = chromosomeMatrix[index];
                 }
-                else
+                if (index_local != -1)
                 {
-                    if (chromosomeMatrixDouble == null)
-                    {
-                        throw new Exception("染色体矩阵为空！");
-                    }
+                    bestChromosomeLocal = chromosomeMatrix[index_local];
+                }
+            }
+            else
+            {
+                if (chromosomeMatrixDouble == null)
+                {
+                    throw new Exception("染色体矩阵为空！");
+                }
+                if (index != -1)
+                {
                     bestChromosomeDouble = chromosomeMatrixDouble[index];
+                }
+                if (index_local != -1)
+                {
+                    bestChromosomeDoubleLocal = chromosomeMatrixDouble[index_local];
                 }
             }
 
