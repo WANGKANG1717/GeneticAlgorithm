@@ -27,7 +27,7 @@ Y:[10, 15, 20]
 // end 多种选择方式 1. 轮盘赌选择 2. 随机选择 3. 锦标赛选择 4. 多目标选择
 // end 多种适应度计算方式 1. 均方误差 2. 绝对值误差 3. 相对值误差 4. 自定义适应度计算方式
 
-using System.Text;
+using System.Diagnostics;
 
 namespace GA_Template
 {
@@ -58,23 +58,19 @@ namespace GA_Template
 
         private double[][]? chromosomeMatrixDouble; // 染色体矩阵 浮点数编码
 
-        double accuracy = 0.001; // 精度
-        string crossType; // 交叉方式 single/twoPoint/uniform
-        string mutationType; // 变异方式 single/uniform
-        int numberOfBits = 6; // 二进制编码的位数 需要根据需要的精度进行动态计算
+        private double accuracy = 0.001; // 精度
+        private string crossType; // 交叉方式 single/twoPoint/uniform
+        private string mutationType; // 变异方式 single/uniform
+        private int numberOfBits = 6; // 二进制编码的位数 需要根据需要的精度进行动态计算
 
-        Func<double[], double[], double> function; // 计算函数 使用Lambda表达式
+        private Func<double[], double[], double> function; // 计算函数 使用Lambda表达式
 
-        private List<double[]> resultAdaptability = []; // 适应度结果集
-        private List<int[][]> resultChromosomeMatrix = []; // 染色体矩阵结果集
+        private double maxAdaptability = double.MinValue;
+        private string[] bestChromosome; // 最大适应度 二进制编码 // 全局最优
+        private double[] bestChromosomeDouble; // 最大适应度 浮点数编码 // 全局最优
 
-        double maxAdaptability = double.MinValue;
-        string[] bestChromosome; // 最大适应度 二进制编码 // 全局最优
-        double[] bestChromosomeDouble; // 最大适应度 浮点数编码 // 全局最优
-
-        string[] bestChromosomeLocal; // 最大适应度 二进制编码 // 最后最优
-        double[] bestChromosomeDoubleLocal; // 最大适应度 浮点数编码 // 最后最优
-
+        public string[] bestChromosomeLocal; // 最大适应度 二进制编码 // 最后最优
+        public double[] bestChromosomeDoubleLocal; // 最大适应度 浮点数编码 // 最后最优
 
         /// <summary>
         /// 构造函数
@@ -186,7 +182,7 @@ namespace GA_Template
         /// </summary>
         /// <param name="binaryString">染色体</param>
         /// <returns>解码后的实际值</returns>
-        private double[] Decode(string[] chromosome)
+        public double[] Decode(string[] chromosome)
         {
             double[] res = new double[K];
             for (int i = 0; i < K; i++)
@@ -279,7 +275,11 @@ namespace GA_Template
 
         public double[] Run()
         {
-            Console.WriteLine("开始遗传算法");
+            Console.WriteLine("########### start ###########");
+            Stopwatch stopwatch = new Stopwatch();
+            // 开始计时
+            stopwatch.Start();
+
             GenerateFirstGeneration();
             // 迭代繁衍
             for (int itIndex = 0; itIndex < iteratorNum; itIndex++)
@@ -367,6 +367,12 @@ namespace GA_Template
             }
 
             CalculateAdaptability(); // 最后再计算一次适应度
+
+            // 停止计时
+            stopwatch.Stop();
+            // 打印运行时间（hh:mm:ss）
+            Console.WriteLine("program running time: " + stopwatch.Elapsed.ToString(@"hh\:mm\:ss"));
+            Console.WriteLine("########### end ###########");
             // 返回值
             if (encodeType == "Binary")
             {
