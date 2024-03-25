@@ -24,12 +24,15 @@ GeneticAlgorithm ga = new GeneticAlgorithm(
     K: 4,
     minValue: 1,
     maxValue: 10,
-    iteratorNum: 100000,
-    chromosomeNum: 100,
+    iteratorNum: 1000,
+    chromosomeNum: 1000,
     crossoverRate: 0.6,
     mutationRate: 0.01,
     function: function,
-    encodeType: "Double");
+    encodeType: "Binary",
+    accuracy: 0.0001,
+    geneticStrategy: "best",
+    reserveRate: 0.1);
 
 double[] res = ga.Run();
 for (int i = 0; i < res.Length; i++)
@@ -64,3 +67,46 @@ for (int i = 0; i < res.Length; i++)
 
 // ga.Run();
 // ga.Test();
+
+
+
+// double[][] x = [[354.94,15.7, 27.18, 702000, 402408, 291509],
+//                 [369, 21, 21, 931636, 221644, 620092],
+//                 [368, 22, 22, 931736, 221744, 620192],
+//                 [367, 23, 23, 931836, 221844, 620292],
+//                 [366, 24, 24, 931936, 221944, 620392],
+//                 [365, 25, 25, 932036, 222044, 620492],
+//                 [366, 26, 26, 932136, 222144, 620592],
+//                 [367, 27, 27, 932236, 222244, 620692],
+//                 [368, 28, 28, 932336, 222344, 620792],
+//                 [369, 29, 29, 932436, 222444, 620892],
+// ];
+// double[] y = [122, 173, 176, 179, 182, 185, 188, 191, 194, 197];
+// // Console.WriteLine(x.Length + "====" + y.Length);
+// Func<double[], double[], double> function = (x, param) =>
+//     {
+//         if (x.Length != 6 || param.Length != 1)
+//         {
+//             throw new Exception("invalid input");
+//         }
+//         return x[0] * x[1] + param[0] * x[2] / x[3] - x[4] + x[5];
+//     };
+// // [1, 2, 6, 10]
+// GeneticAlgorithm ga = new GeneticAlgorithm(
+//     X: x,
+//     Y: y,
+//     K: 1,
+//     minValue: 0.2,
+//     maxValue: 0.8,
+//     iteratorNum: 100000,
+//     chromosomeNum: 100,
+//     crossoverRate: 0.5,
+//     mutationRate: 0.01,
+//     function: function,
+//     encodeType: "Double");
+
+// double[] res = ga.Run();
+// for (int i = 0; i < res.Length; i++)
+// {
+//     Console.WriteLine(res[i]);
+// }
