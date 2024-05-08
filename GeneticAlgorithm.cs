@@ -61,7 +61,7 @@ namespace GA_Template
         private double accuracy = 0.001; // 精度
         private string crossType; // 交叉方式 single/twoPoint/uniform
         private string mutationType; // 变异方式 single/uniform
-        public int[] numberOfBits; // 二进制编码的位数 需要根据需要的精度进行动态计算
+        private int[] numberOfBits; // 二进制编码的位数 需要根据需要的精度进行动态计算
 
         private Func<double[], double[], double> function; // 计算函数 使用Lambda表达式
 
