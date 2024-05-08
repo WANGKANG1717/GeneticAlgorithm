@@ -1,6 +1,6 @@
 ﻿// using GA_Binary_Endode;
-using GA_Template;
-// using GA;
+// using GA_Template;
+using GA;
 // using RandomDataGenerate;
 // MyProgram program = new MyProgram();
 // // program.Run();
@@ -30,8 +30,8 @@ GeneticAlgorithm ga = new GeneticAlgorithm(
     crossoverRate: 0.5,
     mutationRate: 0.05,
     function: function3,
-    encodeType: "Double",
-    accuracy: 0.0001,
+    encodeType: "Binary",
+    accuracy: 0.000001,
     geneticStrategy: "best", // "best" or "random"
     reserveRate: 0.1,
     returnType: "Global");
