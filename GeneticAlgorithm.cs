@@ -88,9 +88,10 @@ namespace GA_Template
         /// <param name="crossoverRate">交叉概率</param>
         /// <param name="mutationRate">变异概率</param>
         /// <param name="function">计算函数</param>
-        /// <param name="accuracy">精度</param>
-        /// <param name="crossType">交叉方式 single/twoPoint/uniform</param>
-        /// <param name="mutationType">变异方式 single/uniform</param>
+        /// <param name="accuracy">精度（Bianry编码有效）</param>
+        /// <param name="crossType">交叉方式 single/twoPoint/uniform（Bianry编码有效）</param>
+        /// <param name="mutationType">变异方式 single/uniform（Bianry编码有效）</param>
+        /// <param name="encodeType">编码方式 Binary/Double</param>
         /// <param name="geneticStrategy">遗传策略 random/best</param>
         /// <param name="reserveRate">最佳保留率 只有在geneticStrategy为best时才有效</param>
         /// <param name="returnType">返回值类型 分为全局最优和局部最优 Local/Global 经过测试，局部最优效果更好</param>
