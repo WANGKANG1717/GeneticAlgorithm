@@ -74,6 +74,7 @@ namespace GA_Template
 
         string returnType = "Local"; // 返回值类型 Local/Global
 
+        /// WANGKANG 2024-05-08 15:56:48
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -175,6 +176,7 @@ namespace GA_Template
             }
         }
 
+        /// WANGKANG 2024-05-08 15:56:48
         /// <summary>
         /// 计算符合精度的二进制编码的长度
         /// </summary>
@@ -195,7 +197,7 @@ namespace GA_Template
             return length;
         }
 
-
+        /// WANGKANG 2024-05-08 15:56:48
         /// <summary>
         /// 解码二进制编码
         /// </summary>
@@ -245,7 +247,12 @@ namespace GA_Template
             }
             return res;
         }
-
+        /// WANGKANG 2024-05-08 15:58:38
+        /// <summary>
+        /// 随机生成二进制字符串
+        /// </summary>
+        /// <param name="length">字符串长度</param>
+        /// <returns></returns>
         private string RandomBinaryString(int length)
         {
             int randomNumber = RandomNumber(length);
@@ -262,11 +269,22 @@ namespace GA_Template
             return binaryString;
         }
 
+        /// WANGKANG 2024-05-08 15:58:38
+        /// <summary>
+        /// 反转字符串
+        /// </summary>
+        /// <param name="str">想要反转的字符串</param>
+        /// <returns></returns>
         private string ReverseString(string str)
         {
             return new string(str.ToCharArray().Reverse().ToArray());
         }
-
+        /// WANGKANG 2024-05-08 15:58:38
+        /// <summary>
+        /// 随机数字生成
+        /// </summary>
+        /// <param name="length">随机数最大值：2^length-1</param>
+        /// <returns></returns>
         private int RandomNumber(int length)
         {
             Random random = new Random();
@@ -274,6 +292,13 @@ namespace GA_Template
             return random.Next(0, (int)(Math.Pow(2, length) - 1));
         }
 
+        /// <summary>
+        /// 最优染色体保留
+        /// </summary>
+        /// <param name="chromosomeMatrix">染色体矩阵</param>
+        /// <param name="naturalSelectionRate">自然选择率</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private object[] reserveBestChromosome(string[][]? chromosomeMatrix, double[] naturalSelectionRate)
         {
             if (chromosomeMatrix == null)
@@ -312,6 +337,11 @@ namespace GA_Template
             return result;
         }
 
+        /// <summary>
+        /// 运行遗传算法
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public double[] Run()
         {
             Console.WriteLine("########### start ###########");
@@ -465,6 +495,13 @@ namespace GA_Template
             }
         }
 
+        /// <summary>
+        /// 最优染色体保留
+        /// </summary>
+        /// <param name="chromosomeMatrixDouble">染色体矩阵</param>
+        /// <param name="naturalSelectionRate">自然选择率</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private object[] reserveBestChromosomeDouble(double[][]? chromosomeMatrixDouble, double[] naturalSelectionRate)
         {
             if (chromosomeMatrixDouble == null)
@@ -503,6 +540,13 @@ namespace GA_Template
             return result;
         }
 
+        /// <summary>
+        /// 合并染色体矩阵
+        /// </summary>
+        /// <param name="bestReserveChromosomeMatrixDouble">最优染色体矩阵</param>
+        /// <param name="newChromosomeMatrixDouble">新的筛选出来的染色体矩阵</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private double[][] mergeChromosomeMatrixDouble(double[][] bestReserveChromosomeMatrixDouble, double[][] newChromosomeMatrixDouble)
         {
             if (bestReserveChromosomeMatrixDouble == null)
@@ -880,6 +924,12 @@ namespace GA_Template
             }
         }
 
+        /// <summary>
+        /// 验证X和Y参数是否正确
+        /// </summary>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
+        /// <exception cref="Exception"></exception>
         private static void Verify(double[][] X, double[] Y)
         {
             if (X.Length != Y.Length)
@@ -1065,6 +1115,12 @@ namespace GA_Template
             }
         }
 
+        /// <summary>
+        /// 解码染色体
+        /// </summary>
+        /// <param name="strings">染色体</param>
+        /// <returns>解码后的染色体</returns>
+        /// <exception cref="Exception"></exception>
         private double[] DecodeChromosome(string[] strings)
         {
             if (strings.Length != K)
@@ -1079,6 +1135,13 @@ namespace GA_Template
             return param;
         }
 
+        /// <summary>
+        /// 计算计算值与实际值的差值之和
+        /// </summary>
+        /// <param name="Y1">实际值/计算值</param>
+        /// <param name="Y2">实际值/计算值</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private double CalculateSumDeviation(double[] Y1, double[] Y2)
         {
             if (Y1.Length != Y2.Length || Y1.Length != N)
