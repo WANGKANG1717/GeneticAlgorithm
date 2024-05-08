@@ -1,7 +1,8 @@
 /**
  * @date: 2024-03-04 21:11:41
  * @author: WangKang
- * @blog: 
+ * @blog: https://wangkang1717.github.io
+ * @email: 1686617586@qq.com
  * @filepath: GeneticAlgorithm.cs
  * @description: 遗传算法
  * Copyright 2024 WANGKANG, All Rights Reserved.
@@ -41,8 +42,8 @@ namespace GA_Template
         private int N; // =X的行数 / =Y的行数
         private int M; // =X的列数
         private int K; // 需要优化的参数个数
-        private double minValue; // 参数取值范围
-        private double maxValue;
+        private double[] minValue; // 参数取值范围
+        private double[] maxValue;
         private int iteratorNum; // 迭代次数
         private int chromosomeNum; // 染色体数量
         private double mutationRate; // 变异概率
@@ -60,7 +61,7 @@ namespace GA_Template
         private double accuracy = 0.001; // 精度
         private string crossType; // 交叉方式 single/twoPoint/uniform
         private string mutationType; // 变异方式 single/uniform
-        private int numberOfBits = 6; // 二进制编码的位数 需要根据需要的精度进行动态计算
+        public int[] numberOfBits; // 二进制编码的位数 需要根据需要的精度进行动态计算
 
         private Func<double[], double[], double> function; // 计算函数 使用Lambda表达式
 
@@ -79,8 +80,8 @@ namespace GA_Template
         /// <param name="X">输入参数矩阵</param>
         /// <param name="Y">输出结果向量</param>
         /// <param name="K">需要优化的参数个数</param>
-        /// <param name="minValue">参数取值范围下限</param> 
-        /// <param name="maxValue">参数取值范围上限</param>
+        /// <param name="minValue">参数取值范围下限 数组类型，指明每一个变量的范围</param> 
+        /// <param name="maxValue">参数取值范围上限 数组类型，指明每一个变量的范围</param>
         /// <param name="iteratorNum">迭代次数</param>
         /// <param name="chromosomeNum">染色体数量</param>
         /// <param name="crossoverRate">交叉概率</param>
@@ -96,8 +97,8 @@ namespace GA_Template
             double[][] X,
             double[] Y,
             int K,
-            double minValue,
-            double maxValue,
+            double[] minValue,
+            double[] maxValue,
             int iteratorNum,
             int chromosomeNum,
             double crossoverRate,
@@ -121,6 +122,12 @@ namespace GA_Template
             this.N = X.Length;
             this.M = X[0].Length;
             this.K = K;
+
+            if (minValue.Length != maxValue.Length || minValue.Length != K)
+            {
+                throw new Exception("参数取值范围下限和上限的长度必须等于参数个数");
+            }
+
             this.minValue = minValue;
             this.maxValue = maxValue;
             this.iteratorNum = iteratorNum;
@@ -172,13 +179,18 @@ namespace GA_Template
         /// 计算符合精度的二进制编码的长度
         /// </summary>
         /// <returns>二进制编码的应有长度</returns>
-        private int calculateNumberOfBits()
+        private int[] calculateNumberOfBits()
         {
-            int length = (int)Math.Ceiling(Math.Log2((maxValue - minValue) / accuracy + 1));
-            if (length > 32)
+            int[] length = new int[K];
+            for (int i = 0; i < K; i++)
             {
-                length = 32;
-                Console.WriteLine("Warning: 二进制编码位数超过32位，将使用32位");
+                int tmp_length = (int)Math.Ceiling(Math.Log2((maxValue[i] - minValue[i]) / accuracy + 1));
+                length[i] = tmp_length;
+                if (length[i] > 31)
+                {
+                    length[i] = 31;
+                    Console.WriteLine("Warning: 二进制编码位数超过31位，将使用31位");
+                }
             }
             return length;
         }
@@ -188,14 +200,15 @@ namespace GA_Template
         /// 解码二进制编码
         /// </summary>
         /// <param name="binaryString">二进制编码</param>
+        /// <param name="index">需要解码的变量的索引</param>
         /// <returns>解码后的实际值</returns>
-        private double Decode(string binaryString)
+        private double Decode(string binaryString, int index)
         {
-            if (binaryString.Length != numberOfBits)
+            if (binaryString.Length != numberOfBits[index])
             {
                 throw new Exception("二进制编码长度不正确");
             }
-            return minValue + (maxValue - minValue) / (Math.Pow(2, numberOfBits) - 1) * StringToNumber(binaryString);
+            return minValue[index] + (maxValue[index] - minValue[index]) / (Math.Pow(2, numberOfBits[index]) - 1) * StringToNumber(binaryString);
         }
 
         /// <summary>
@@ -212,7 +225,7 @@ namespace GA_Template
             double[] res = new double[K];
             for (int i = 0; i < K; i++)
             {
-                res[i] = Decode(chromosome[i]);
+                res[i] = Decode(chromosome[i], i);
             }
             return res;
         }
@@ -257,7 +270,8 @@ namespace GA_Template
         private int RandomNumber(int length)
         {
             Random random = new Random();
-            return random.Next(0, (int)Math.Pow(2, length));
+            // Console.WriteLine((int)(Math.Pow(2, length) - 1));
+            return random.Next(0, (int)(Math.Pow(2, length) - 1));
         }
 
         private object[] reserveBestChromosome(string[][]? chromosomeMatrix, double[] naturalSelectionRate)
@@ -565,17 +579,23 @@ namespace GA_Template
                     double rate = random.NextDouble();
                     if (rate <= mutationRate * Math.Pow(1 - iterations / (iteratorNum - 1), 2)) // 变异率应该逐步减少，，以达到稳定状态
                     {
-                        newChromosomeMatrixDouble[i][j] = RandomMutationDouble(newChromosomeMatrixDouble[i][j]); // 单点变异
+                        newChromosomeMatrixDouble[i][j] = RandomMutationDouble(newChromosomeMatrixDouble[i][j], j); // 单点变异
                     }
                 }
             }
             return newChromosomeMatrixDouble;
         }
 
-        private double RandomMutationDouble(double val)
+        /// <summary>
+        /// 单点变异
+        /// </summary>
+        /// <param name="val">好像没用到，但是不排除后面可能会用，暂时不改</param>
+        /// <param name="index">变量索引 0~K-1</param>
+        /// <returns></returns>
+        private double RandomMutationDouble(double val, int index)
         {
             Random random = new Random();
-            return random.NextDouble() * (maxValue - minValue) + minValue;
+            return random.NextDouble() * (maxValue[index] - minValue[index]) + minValue[index];
         }
 
         private double[][] CrossDouble(double[][] newChromosomeMatrixDouble)
@@ -764,7 +784,7 @@ namespace GA_Template
             string[] chromosome = new string[K];
             for (int k = 0; k < K; k++)
             {
-                int point = random.Next(1, numberOfBits - 1); // 随机选择交叉点 1-numberOfBits-1
+                int point = random.Next(1, numberOfBits[k] - 1); // 随机选择交叉点 1-numberOfBits-1
                 chromosome[k] = chromosome1[k].Substring(0, point) + chromosome2[k].Substring(point);
             }
             return chromosome;
@@ -779,9 +799,9 @@ namespace GA_Template
             string[] chromosome = new string[K];
             for (int k = 0; k < K; k++)
             {
-                int mid = numberOfBits / 2;
+                int mid = numberOfBits[k] / 2;
                 int point1 = random.Next(0, mid);
-                int point2 = random.Next(mid, numberOfBits);
+                int point2 = random.Next(mid, numberOfBits[k]);
                 chromosome[k] = chromosome1[k].Substring(0, point1) + chromosome2[k].Substring(point1, point2 - point1) + chromosome1[k].Substring(point2);
             }
             return chromosome;
@@ -797,7 +817,7 @@ namespace GA_Template
             for (int k = 0; k < K; k++)
             {
                 chromosome[k] = "";
-                for (int i = 0; i < numberOfBits; i++)
+                for (int i = 0; i < numberOfBits[k]; i++)
                 {
                     chromosome[k] += random.NextDouble() <= 0.5 ? chromosome1[k][i] : chromosome2[k][i];
                 }
@@ -818,13 +838,13 @@ namespace GA_Template
                         switch (mutationType)
                         {
                             case "single":
-                                newChromosomeMatrix[i][j] = OnePointMutation(newChromosomeMatrix[i][j]); // 单点变异
+                                newChromosomeMatrix[i][j] = OnePointMutation(newChromosomeMatrix[i][j], j); // 单点变异
                                 break;
                             case "uniform":
-                                newChromosomeMatrix[i][j] = UniformPointMutation(newChromosomeMatrix[i][j]); // 均匀变异
+                                newChromosomeMatrix[i][j] = UniformPointMutation(newChromosomeMatrix[i][j], j); // 均匀变异
                                 break;
                             default:
-                                newChromosomeMatrix[i][j] = OnePointMutation(newChromosomeMatrix[i][j]); // 单点变异
+                                newChromosomeMatrix[i][j] = OnePointMutation(newChromosomeMatrix[i][j], j); // 单点变异
                                 break;
                         }
                     }
@@ -833,18 +853,18 @@ namespace GA_Template
             return newChromosomeMatrix;
         }
 
-        private string OnePointMutation(string chromosome)
+        private string OnePointMutation(string chromosome, int index)
         {
             Random random = new Random();
-            int point = random.Next(0, numberOfBits);
+            int point = random.Next(0, numberOfBits[index]);
             return chromosome.Substring(0, point) + (chromosome[point] ^ '1').ToString() + chromosome.Substring(point + 1);
         }
 
-        private string UniformPointMutation(string chromosome)
+        private string UniformPointMutation(string chromosome, int index)
         {
             string newChromosome = "";
             Random random = new Random();
-            for (int i = 0; i < numberOfBits; i++)
+            for (int i = 0; i < numberOfBits[index]; i++)
             {
                 newChromosome += random.NextDouble() <= 0.5 ? chromosome[i] : (chromosome[i] ^ '1').ToString();
             }
@@ -899,7 +919,7 @@ namespace GA_Template
                 newChromosomeMatrix[chromosomeIndex] = new string[K];
                 for (var i = 0; i < K; i++)
                 {
-                    newChromosomeMatrix[chromosomeIndex][i] = RandomBinaryString(numberOfBits);
+                    newChromosomeMatrix[chromosomeIndex][i] = RandomBinaryString(numberOfBits[i]);
                 }
             }
             return newChromosomeMatrix;
@@ -912,7 +932,7 @@ namespace GA_Template
                 newChromosomeMatrix[chromosomeIndex] = new double[K];
                 for (var i = 0; i < K; i++)
                 {
-                    newChromosomeMatrix[chromosomeIndex][i] = RandomDouble(minValue, maxValue);
+                    newChromosomeMatrix[chromosomeIndex][i] = RandomDouble(minValue[i], maxValue[i]);
                 }
             }
             return newChromosomeMatrix;
@@ -1054,7 +1074,7 @@ namespace GA_Template
             double[] param = new double[K];
             for (int i = 0; i < K; i++)
             {
-                param[i] = Decode(strings[i]);
+                param[i] = Decode(strings[i], i);
             }
             return param;
         }
